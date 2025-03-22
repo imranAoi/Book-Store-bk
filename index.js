@@ -4,15 +4,21 @@ const cors = require('cors');
 require('dotenv').config();
 const app = express();
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5001;
 
 // Middleware to parse JSON bodies
 app.use(express.json());
 
 // CORS configuration
 app.use(cors({
-    origin: ['http://localhost:5173', 'https://new-book-store-lemon.vercel.app'],
-    credentials: true,
+    origin: [
+        'http://localhost:5173',
+        'https://new-book-store-lemon.vercel.app',
+        'https://book-store-bk-beta.vercel.app' // Add your backend domain too
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
 }));
 
 // Routes
