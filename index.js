@@ -1,38 +1,51 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-
 const mongoose = require("mongoose");
 const port = process.env.PORT || 5000;
-require('dotenv').config()
+require('dotenv').config();
 
-// middleware
+// Enhanced CORS configuration
+const corsOptions = {
+    origin: [
+        'http://localhost:5173',
+        'https://book-store-bk-beta.vercel.app'
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Handle preflight for all routes
+
+// Additional headers middleware
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', req.headers.origin);
+    res.header('Access-Control-Allow-Credentials', true);
+    next();
+});
+
 app.use(express.json());
-app.use(cors({
-    origin: ['http://localhost:5173','https://new-book-store-lemon.vercel.app'],
-    credentials: true
-}))
 
-// routes
-const bookRoutes = require('./src/books/book.route');
-const orderRoutes = require("./src/orders/order.route")
-const userRoutes =  require("./src/users/user.route")
-const adminRoutes = require("./src/stats/admin.stats")
+// Routes
+app.use("/api/books", require('./src/books/book.route'));
+app.use("/api/orders", require("./src/orders/order.route"));
+app.use("/api/auth", require("./src/users/user.route"));
+app.use("/api/admin", require("./src/stats/admin.stats"));
 
-app.use("/api/books", bookRoutes)
-app.use("/api/orders", orderRoutes)
-app.use("/api/auth", userRoutes)
-app.use("/api/admin", adminRoutes)
-
+// Database connection
 async function main() {
-  await mongoose.connect(process.env.DB_URL);
-  app.use("/", (req, res) => {
-    res.send("Book Store Server is running!");
-  });
+    await mongoose.connect(process.env.DB_URL);
+    app.use("/", (req, res) => {
+        res.send("Book Store Server is running!");
+    });
 }
 
-main().then(() => console.log("Mongodb connect successfully!")).catch(err => console.log(err));
+main()
+    .then(() => console.log("MongoDB connected successfully!"))
+    .catch(err => console.log(err));
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+    console.log(`Server running on port ${port}`);
 });
